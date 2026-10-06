@@ -1,0 +1,36 @@
+@import 'tailwindcss';
+
+/*
+ * Keep the root font size at the browser default (16px): Tailwind sizes are in rem,
+ * and the canvas layout assumes `w-60` = 240px.
+ */
+@layer base {
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
+  body {
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
+    color: var(--color-zinc-900);
+    background-color: #fff;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
