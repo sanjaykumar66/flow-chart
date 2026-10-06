@@ -13,7 +13,8 @@ const findElement = (selector: string) =>
     return el
   })
 
-const card = (title: string) => screen.findByRole('button', { name: new RegExp(`^${title},`) })
+const card = (title: string) =>
+  screen.findByRole('button', { name: new RegExp(`^${title}(\\s|$)`) })
 
 describe('FlowView', () => {
   beforeEach(() => {
@@ -612,6 +613,43 @@ describe('FlowView', () => {
         document.querySelector('.vue-flow__node[data-id="b0653a"] [data-highlighted]')
       await waitFor(() => expect(highlighted()).not.toBeNull())
       await waitFor(() => expect(highlighted()).toBeNull(), { timeout: 3000 })
+    })
+  })
+
+  describe('page structure', () => {
+    it('has headings in order: page, steps section, then each step', async () => {
+      await renderAt('/')
+      await revealNodes()
+      expect(screen.getByRole('heading', { level: 1, name: 'Flow Builder' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: 'Flow steps' })).toBeInTheDocument()
+      expect(screen.getAllByRole('heading', { level: 3 }).length).toBeGreaterThan(0)
+    })
+
+    it('announces toasts through a live region inside a landmark', async () => {
+      await renderAt('/nodes/e879e4')
+      await waitFor(() => expect(drawerTitle()).toBe('Add Comment #1'))
+      await fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+      const toast = await screen.findByText('Changes saved')
+      const live = toast.closest('[role="status"]')
+      expect(live).toHaveAttribute('aria-live', 'polite')
+      expect(live?.closest('section')).toHaveAccessibleName('Notifications')
+    })
+
+    it('names the confirmation dialogs by their question', async () => {
+      await renderAt('/nodes/e879e4')
+      await waitFor(() => expect(drawerTitle()).toBe('Add Comment #1'))
+      await fireEvent.update(screen.getByPlaceholderText('e.g. Welcome Message'), 'Changed')
+      await fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+      expect(
+        await screen.findByRole('dialog', { name: 'Discard unsaved changes?' }),
+      ).toBeInTheDocument()
+    })
+
+    it('keeps the More actions menu inside the header', async () => {
+      await renderAt('/')
+      await fireEvent.click(screen.getByRole('button', { name: 'More actions' }))
+      const option = await screen.findByText('Reset demo data…')
+      expect(option.closest('header')).not.toBeNull()
     })
   })
 })

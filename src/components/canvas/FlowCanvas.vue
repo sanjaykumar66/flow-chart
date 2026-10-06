@@ -124,6 +124,8 @@ function onNodeDragStop({ node }: NodeDragEvent) {
 
 <template>
   <div class="size-full bg-zinc-50">
+    <!-- Section heading for the step cards (h3), so heading levels don't skip from the h1. -->
+    <h2 class="sr-only">Flow steps</h2>
     <p :id="helpId" class="sr-only">
       Press Enter or Space to open the step's details. Use the arrow keys to move it, with Shift to
       move further. Press question mark for all keyboard shortcuts.

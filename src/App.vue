@@ -5,10 +5,14 @@ import { themeOverrides } from '@/theme/naive'
 
 <template>
   <NConfigProvider :theme-overrides="themeOverrides">
-    <NMessageProvider>
+    <!-- Toasts render into the live region below, so screen readers announce them (WCAG 4.1.3). -->
+    <NMessageProvider to="#app-notifications">
       <NDialogProvider>
         <RouterView />
       </NDialogProvider>
     </NMessageProvider>
+    <section aria-label="Notifications">
+      <div id="app-notifications" role="status" aria-live="polite" />
+    </section>
   </NConfigProvider>
 </template>

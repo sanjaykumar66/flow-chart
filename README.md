@@ -726,7 +726,8 @@ The app targets **WCAG 2.1 level AA** and is checked automatically at three leve
 
 1. **ESLint** (`eslint-plugin-vuejs-accessibility`) catches missing labels, alt text and keyboard
    handlers in templates.
-2. **Unit tests** run axe-core's WCAG 2.1 A/AA rules on every screen and dialog
+2. **Unit tests** run axe-core's WCAG 2.1 A/AA rules, plus its best practices (heading order,
+   landmarks, dialog names), on every screen and dialog
    (`tests/a11y/wcag.spec.ts`).
 3. **Browser tests** (`yarn test:a11y`) run the same rules in a real browser. This also checks
    colour contrast, which needs real rendering.
@@ -756,7 +757,12 @@ The app targets **WCAG 2.1 level AA** and is checked automatically at three leve
 ### Screen readers and motion
 
 - **Fields** are labelled, and Naive UI selects get a name through `v-control-label`.
-- **Cards** announce their title and type, plus a short description of their keyboard controls.
+- **Cards** are named by their visible title and description, then announce their type and a
+  short description of their keyboard controls.
+- **Headings** go in order: the page title (h1), a hidden "Flow steps" heading (h2), then each
+  step's title (h3).
+- **Toasts** ("Changes saved", errors) render inside a polite live region in a "Notifications"
+  landmark, so screen readers announce them (WCAG 4.1.3).
 - **Lines** are announced by the steps they join ("Trigger to Business Hours").
 - **The drawer** is announced as a non-modal panel named by the step's title.
 - **Tooltips** appear on keyboard focus as well as hover.

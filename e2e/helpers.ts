@@ -1,8 +1,11 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page } from '@playwright/test'
 
-/** axe-core tags for WCAG 2.1 levels A and AA (2.0 rules included, as 2.1 builds on them). */
-export const WCAG_21_AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
+/**
+ * axe-core rules to run: WCAG 2.1 levels A and AA (2.0 rules included, as 2.1 builds on them),
+ * plus axe's best practices, such as heading order and landmarks, which Lighthouse also checks.
+ */
+export const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice']
 
 /**
  * Library markup we can't change, excluded on purpose: Naive UI's focus trap adds empty
@@ -15,7 +18,7 @@ export async function expectNoA11yViolations(page: Page) {
   // Let open/close transitions finish so axe sees final colours and states.
   await page.waitForTimeout(400)
   const { violations } = await new AxeBuilder({ page })
-    .withTags(WCAG_21_AA)
+    .withTags(AXE_TAGS)
     .exclude(LIBRARY_EXCEPTIONS)
     .analyze()
   const report = violations.map((v) => ({
@@ -40,4 +43,4 @@ export async function openApp(page: Page, path = '/') {
 }
 
 export const card = (page: Page, title: string) =>
-  page.getByRole('button', { name: new RegExp(`^${title},`) })
+  page.getByRole('button', { name: new RegExp(`^${title}(\\s|$)`) })
