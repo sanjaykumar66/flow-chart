@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue'
-import { NFormItem, NSelect, NTimePicker, type FormItemRule } from 'naive-ui'
-import { CalendarDaysIcon, ClockIcon } from '@heroicons/vue/24/outline'
-import { WEEK_DAYS } from '@/constants/forms'
+import { NFormItem, NSelect, NSwitch, NTimePicker, type FormItemRule } from 'naive-ui'
+import { ClockIcon } from '@heroicons/vue/24/outline'
+import { DEFAULT_OPENING_HOURS, WEEK_DAYS } from '@/constants/forms'
 import type { BusinessHoursSlot, WeekDay } from '@/types/flow'
 import { getTimeRangeError } from '@/utils/time'
 import { getTimezoneOptions } from '@/utils/timezone'
@@ -39,6 +39,14 @@ const timezoneRule: FormItemRule = {
   trigger: ['change', 'blur'],
 }
 
+/** Opens a closed day (with the default hours) or closes an open one, keeping week order. */
+function setOpen(day: WeekDay, open: boolean) {
+  const others = times.value.filter((slot) => slot.day !== day)
+  const next = open ? [...others, { day, ...DEFAULT_OPENING_HOURS }] : others
+  const order = WEEK_DAYS.map(({ value }) => value)
+  times.value = next.sort((a, b) => order.indexOf(a.day) - order.indexOf(b.day))
+}
+
 function updateSlot(day: WeekDay, key: 'startTime' | 'endTime', value: string | null) {
   times.value = times.value.map((slot) =>
     slot.day === day ? { ...slot, [key]: value ?? '' } : slot,
@@ -47,9 +55,13 @@ function updateSlot(day: WeekDay, key: 'startTime' | 'endTime', value: string | 
 </script>
 
 <template>
-  <div class="mb-2 grid grid-cols-[3rem_1fr] gap-3 text-xs text-zinc-500" aria-hidden="true">
-    <span class="flex items-center gap-1.5"><CalendarDaysIcon class="size-4" /> Day</span>
-    <span class="flex items-center gap-1.5"><ClockIcon class="size-4" /> Time</span>
+  <div
+    class="mb-2 grid grid-cols-[2.5rem_2.25rem_1fr] items-center gap-2 text-xs text-zinc-500 sm:gap-3"
+    aria-hidden="true"
+  >
+    <span>Day</span>
+    <span>Open</span>
+    <span class="flex items-center gap-1.5"><ClockIcon class="size-4" /> Hours</span>
   </div>
 
   <NFormItem
@@ -60,8 +72,16 @@ function updateSlot(day: WeekDay, key: 'startTime' | 'endTime', value: string | 
     :show-label="false"
     :show-require-mark="false"
   >
-    <div class="grid w-full grid-cols-[3rem_minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+    <div
+      class="grid w-full grid-cols-[2.5rem_2.25rem_minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:gap-3"
+    >
       <span class="text-sm font-semibold text-zinc-900">{{ row.label }}</span>
+      <NSwitch
+        size="small"
+        :value="Boolean(row.slot)"
+        :aria-label="`${row.label} open`"
+        @update:value="setOpen(row.day, $event)"
+      />
       <template v-if="row.slot">
         <!-- NTimePicker has no input-props, so a wrapping label names the input -->
         <label class="block min-w-0">

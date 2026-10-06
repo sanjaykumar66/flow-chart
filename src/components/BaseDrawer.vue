@@ -17,8 +17,20 @@ withDefaults(
     iconColor?: string
     /** Pixels (capped at the screen width on phones) or any CSS width. */
     width?: number | string
+    /**
+     * Element to open inside (a selector), e.g. the canvas, so the header above stays usable.
+     * The element needs `position: relative`. Defaults to the whole page.
+     */
+    to?: string
   }>(),
-  { title: '', description: '', icon: undefined, iconColor: undefined, width: DRAWER_WIDTH },
+  {
+    title: '',
+    description: '',
+    icon: undefined,
+    iconColor: undefined,
+    width: DRAWER_WIDTH,
+    to: undefined,
+  },
 )
 
 defineSlots<{
@@ -77,6 +89,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 <template>
   <NDrawer
     v-model:show="show"
+    :to="to"
     placement="right"
     :width="typeof width === 'number' ? `min(${width}px, 100vw)` : width"
     :show-mask="false"

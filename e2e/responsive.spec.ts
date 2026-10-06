@@ -42,6 +42,16 @@ for (const [name, width, height] of [
       const box = (await drawer.boundingBox())!
       expect(box.width).toBeLessThanOrEqual(width + 0.5) // sub-pixel rounding
       await expect(page.getByRole('button', { name: 'Save' })).toBeInViewport()
+      // The drawer sits below the header: its buttons stay clickable, not covered.
+      for (const name of ['Undo', 'Create New Node']) {
+        const button = page.locator('header').getByRole('button', { name })
+        const covered = await button.evaluate((el) => {
+          const r = el.getBoundingClientRect()
+          const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+          return !el.contains(top) && !top?.contains(el)
+        })
+        expect(covered).toBe(false)
+      }
       await expect(page.getByRole('button', { name: 'Delete' })).toBeInViewport()
     })
 

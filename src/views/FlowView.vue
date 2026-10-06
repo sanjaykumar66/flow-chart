@@ -437,7 +437,12 @@ async function onDeleteDialogClosed() {
       </template>
     </AppToolbar>
 
-    <main class="relative min-h-0 flex-1 outline-none" tabindex="-1" aria-label="Flow canvas">
+    <main
+      id="flow-canvas"
+      class="relative min-h-0 flex-1 outline-none"
+      tabindex="-1"
+      aria-label="Flow canvas"
+    >
       <div v-if="status === 'loading'" class="grid size-full place-items-center">
         <NSpin description="Loading flow…" />
       </div>
@@ -470,9 +475,11 @@ async function onDeleteDialogClosed() {
     </main>
   </div>
 
+  <!-- Opens over the canvas only, so Undo/Redo and Create stay reachable while editing. -->
   <BaseDrawer
     ref="drawer"
     v-model:show="drawerOpen"
+    to="#flow-canvas"
     :title="form.title || selectedMeta?.label"
     :icon="selectedMeta?.icon"
     :icon-color="selectedMeta?.color"

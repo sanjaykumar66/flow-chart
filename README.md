@@ -128,6 +128,8 @@ every path to `index.html`, so deep links like `/nodes/b6a0c1` work on refresh.
 
 - Click a step, or press Enter on it, to open the drawer. The URL becomes `/nodes/<id>`, so a step
   can be linked to directly, and browser back/forward works.
+- The drawer opens over the canvas, below the toolbar, so Undo/Redo and Create stay usable while
+  editing.
 - Clicking the open step again closes the drawer. Success/Failure labels are display-only and
   can't be opened.
 - Every step has an editable **title** and **description**, plus an editor for its type:
@@ -135,7 +137,8 @@ every path to `index.html`, so deep links like `/nodes/b6a0c1` work on refresh.
     to 6 images of up to 2 MB each, or remove them. Message texts can be edited, added and
     removed.
   - **Add Comment:** edit or remove the comment.
-  - **Business Hours:** opening and closing time for each day, and a timezone (searchable, with
+  - **Business Hours:** a switch per day to open or close it (a day you open starts at
+    09:00–17:00), opening and closing times for each open day, and a timezone (searchable, with
     UTC offsets).
 - **Delete** (all steps except the Trigger) asks for confirmation first. See the
   [delete rules](#gaps-in-the-brief-and-how-they-were-filled).
@@ -860,8 +863,6 @@ The browser tests (`yarn test:e2e`) aren't part of CI. Run them locally when you
 
 - **Browser-only data.** Data is stored in `localStorage`, so it isn't shared between browsers or
   devices. Attachments are stored inline, which is why each image is limited to 2 MB.
-- **Closed days.** Business Hours edits the days the step already has. Days without hours show as
-  Closed, and adding hours to a closed day isn't supported yet.
 - **Tree structure.** Steps can be moved freely on the canvas, but which step follows which
   changes only through create and delete, not by dragging.
 - **Undo scope.** Undo covers moves, saved edits and layout resets. It doesn't cover creating or

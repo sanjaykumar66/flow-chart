@@ -645,6 +645,12 @@ describe('FlowView', () => {
       ).toBeInTheDocument()
     })
 
+    it('opens the drawer over the canvas only, leaving the header usable', async () => {
+      await renderAt('/nodes/e879e4')
+      await waitFor(() => expect(drawerTitle()).toBe('Add Comment #1'))
+      expect(document.querySelector('.n-drawer')?.closest('main')).toBe(screen.getByRole('main'))
+    })
+
     it('keeps the More actions menu inside the header', async () => {
       await renderAt('/')
       await fireEvent.click(screen.getByRole('button', { name: 'More actions' }))

@@ -1,4 +1,4 @@
-import { WEEK_DAYS } from '@/constants/forms'
+import { DEFAULT_OPENING_HOURS, WEEK_DAYS } from '@/constants/forms'
 import type { CreateNodeValues, RawFlowNode, RawNodeId } from '@/types/flow'
 import { normalizeId, normalizeParentId } from './flowGraph'
 import type { NodeFormValues } from './nodeForm'
@@ -72,11 +72,7 @@ export function createNodeRecords(
           ...base,
           type: 'dateTime',
           data: {
-            times: WEEK_DAYS.map(({ value }) => ({
-              day: value,
-              startTime: '09:00',
-              endTime: '17:00',
-            })),
+            times: WEEK_DAYS.map(({ value }) => ({ day: value, ...DEFAULT_OPENING_HOURS })),
             connectors: [successId, failureId],
             timezone: 'UTC',
             action: 'businessHours',
