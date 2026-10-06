@@ -10,6 +10,9 @@ withDefaults(
     iconColor?: string
     /** Highlights the card, e.g. while its details drawer is open. */
     selected?: boolean
+    /** Ids for the title and description, so a wrapping control can be named by them. */
+    titleId?: string
+    descriptionId?: string
   }>(),
   {
     title: '',
@@ -17,6 +20,8 @@ withDefaults(
     icon: undefined,
     iconColor: undefined,
     selected: false,
+    titleId: undefined,
+    descriptionId: undefined,
   },
 )
 
@@ -44,7 +49,7 @@ const tooltipProps = { placement: 'top', delay: 250, style: { maxWidth: '320px' 
           :style="{ color: iconColor }"
           aria-hidden="true"
         />
-        <h3 class="min-w-0 text-sm font-semibold text-zinc-900">
+        <h3 :id="titleId" class="min-w-0 text-sm font-semibold text-zinc-900">
           <NEllipsis :tooltip="tooltipProps">{{ title }}</NEllipsis>
         </h3>
       </slot>
@@ -52,7 +57,7 @@ const tooltipProps = { placement: 'top', delay: 250, style: { maxWidth: '320px' 
 
     <div class="px-3 py-2.5">
       <slot>
-        <p class="text-sm whitespace-pre-line text-zinc-600">
+        <p :id="descriptionId" class="text-sm whitespace-pre-line text-zinc-600">
           <NEllipsis :line-clamp="3" :tooltip="tooltipProps">{{ description }}</NEllipsis>
         </p>
       </slot>

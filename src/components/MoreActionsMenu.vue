@@ -34,8 +34,10 @@ function onSelect(key: string) {
 </script>
 
 <template>
+  <!-- Rendered in place (not in <body>) so the menu stays inside the header landmark. -->
   <NDropdown
     v-model:show="menuOpen"
+    :to="false"
     trigger="click"
     placement="bottom-end"
     :options="options"

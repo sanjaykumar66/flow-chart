@@ -224,13 +224,15 @@ watch(
 
 // ---- Unsaved changes: ask before switching or closing the step, or leaving the page ----
 const dialog = useDialog()
+/** A dialog title that is also its accessible name (Naive doesn't link the two). */
+const namedDialog = (title: string) => ({ title, 'aria-label': title })
 const isDirty = () => savedForm.value !== null && !isSameNodeForm(form, savedForm.value)
 
 function askToDiscard() {
   return new Promise<boolean>((resolve) => {
     const keepEditing = () => resolve(false)
     dialog.warning({
-      title: 'Discard unsaved changes?',
+      ...namedDialog('Discard unsaved changes?'),
       content: `Your changes to “${savedForm.value?.title}” haven't been saved.`,
       positiveText: 'Discard',
       negativeText: 'Keep editing',
@@ -335,7 +337,7 @@ const resetMutation = useResetFlow()
 /** Back to the original payload: steps, details and layout. Asks first; can't be undone. */
 function onResetDemo() {
   dialog.warning({
-    title: 'Reset the demo flow?',
+    ...namedDialog('Reset the demo flow?'),
     content:
       'This brings back the original flow. Every step you added, edited or deleted, and any ' +
       "step you moved, will be lost. This can't be undone.",

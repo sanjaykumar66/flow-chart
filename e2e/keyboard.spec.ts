@@ -14,20 +14,26 @@ test.describe('keyboard', () => {
     for (let i = 0; i < 25; i++) {
       await page.keyboard.press('Tab')
       reached.push(
-        await page.evaluate(
-          () =>
-            document.activeElement?.getAttribute('aria-label') ??
-            document.activeElement?.textContent?.trim() ??
-            '',
-        ),
+        await page.evaluate(() => {
+          // aria-label, then aria-labelledby, then text: enough of the accessible name to compare
+          const el = document.activeElement
+          const labelledBy = el?.getAttribute('aria-labelledby')
+          const text = labelledBy
+            ? labelledBy
+                .split(' ')
+                .map((id) => document.getElementById(id)?.textContent ?? '')
+                .join(' ')
+            : el?.textContent
+          return el?.getAttribute('aria-label') ?? text?.replace(/\s+/g, ' ').trim() ?? ''
+        }),
       )
     }
     expect(reached).toContain('Create New Node')
     expect(reached).toContain('Keyboard shortcuts')
-    expect(reached.some((name) => name.startsWith('Welcome Message, Send Message'))).toBe(true)
+    expect(reached.some((name) => name.startsWith('Welcome Message Hello there'))).toBe(true)
     expect(reached.some((name) => name.startsWith('Add a step between'))).toBe(true)
     // the "+" above a step comes right before it
-    const welcome = reached.findIndex((name) => name.startsWith('Welcome Message,'))
+    const welcome = reached.findIndex((name) => name.startsWith('Welcome Message '))
     expect(reached[welcome - 1]).toBe('Add a step between “Success” and “Welcome Message”')
     // the canvas controls are a single Tab stop
     expect(reached.filter((name) => /^Zoom|^Fit flow|fullscreen$/.test(name))).toHaveLength(1)

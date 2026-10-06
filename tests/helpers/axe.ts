@@ -1,7 +1,10 @@
 import axe from 'axe-core'
 
-/** axe-core tags for WCAG 2.1 levels A and AA (2.0 rules included, as 2.1 builds on them). */
-export const WCAG_21_AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
+/**
+ * axe-core rules to run: WCAG 2.1 levels A and AA (2.0 rules included, as 2.1 builds on them),
+ * plus axe's best practices, such as heading order and landmarks, which Lighthouse also checks.
+ */
+export const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice']
 
 /**
  * Known library markup we can't change, excluded on purpose:
@@ -19,7 +22,7 @@ export async function expectNoA11yViolations(context: Element = document.body) {
   const { violations } = await axe.run(
     { include: [context], exclude: LIBRARY_EXCEPTIONS },
     {
-      runOnly: { type: 'tag', values: WCAG_21_AA },
+      runOnly: { type: 'tag', values: AXE_TAGS },
       rules: { 'color-contrast': { enabled: false } },
     },
   )

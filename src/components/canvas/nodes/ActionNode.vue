@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useId } from 'vue'
 import { Handle, Position, type NodeProps } from '@vue-flow/core'
 import BaseCard from '@/components/BaseCard.vue'
 import { NUDGE_STEP, NUDGE_STEP_LARGE } from '@/constants/canvas'
@@ -12,6 +13,9 @@ import { useCanvasContext } from '../context'
 const props = defineProps<NodeProps<ActionNodeData>>()
 
 const canvas = useCanvasContext()
+const typeId = useId()
+const titleId = useId()
+const descriptionId = useId()
 
 // Mouse clicks are handled by Vue Flow (it ignores the click that ends a drag);
 // this covers keyboard users.
@@ -31,7 +35,8 @@ function onArrowKey(event: KeyboardEvent) {
   <div class="relative">
     <!-- "+" on the incoming line: insert a step between the one above and this one. Rendered
          here (not by the edge) so it comes right before this card in the Tab order. -->
-    <div v-if="data.insertAfter" class="absolute bottom-full left-1/2 mb-1.5 -translate-x-1/2">
+    <!-- Centred in the gap above the card, clear of both cards (WCAG 2.5.8 target spacing). -->
+    <div v-if="data.insertAfter" class="absolute bottom-full left-1/2 mb-[22px] -translate-x-1/2">
       <AddNodeButton
         :color="data.insertAfter.color"
         :label="`Add a step between “${data.insertAfter.title}” and “${data.title}”`"
@@ -54,8 +59,8 @@ function onArrowKey(event: KeyboardEvent) {
       role="button"
       tabindex="0"
       :aria-pressed="data.selected"
-      :aria-label="`${data.title}, ${NODE_TYPES[data.nodeType].label}. Open details`"
-      :aria-describedby="canvas.helpId"
+      :aria-labelledby="data.description ? `${titleId} ${descriptionId}` : titleId"
+      :aria-describedby="`${typeId} ${canvas.helpId}`"
       @keydown.enter.prevent="onKeyActivate"
       @keydown.space.prevent="onKeyActivate"
       @keydown.up="onArrowKey"
@@ -69,9 +74,14 @@ function onArrowKey(event: KeyboardEvent) {
         :icon="NODE_TYPES[data.nodeType].icon"
         :icon-color="data.color"
         :selected="data.selected"
+        :title-id="titleId"
+        :description-id="descriptionId"
         class="cursor-pointer hover:shadow-md"
       />
     </div>
+
+    <!-- The card's visible title and description name it (WCAG 2.5.3); the type is read after. -->
+    <span :id="typeId" class="sr-only">{{ NODE_TYPES[data.nodeType].label }} step.</span>
 
     <Handle type="source" :position="Position.Bottom" :connectable="false" class="flow-handle" />
 

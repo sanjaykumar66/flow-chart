@@ -36,7 +36,7 @@ async function mountCanvas(props: Record<string, unknown> = {}) {
   return wrapper
 }
 
-const card = (title: string) => screen.getByRole('button', { name: new RegExp(`^${title},`) })
+const card = (title: string) => screen.getByRole('button', { name: new RegExp(`^${title}(\\s|$)`) })
 
 describe('FlowCanvas', () => {
   // Vue Flow warns about missing container size/styles, which a DOM without layout can't provide.
@@ -57,12 +57,19 @@ describe('FlowCanvas', () => {
     expect(screen.getByText('Failure')).toBeInTheDocument()
   })
 
-  it('shows each card’s description and type in its accessible name', async () => {
+  it('names each card by its visible text and describes its type (WCAG 2.5.3)', async () => {
     await renderCanvas()
-    expect(card('Business Hours')).toHaveAccessibleName(
-      'Business Hours, Business Hours. Open details',
-    )
-    expect(screen.getByText('Conversation Opened')).toBeInTheDocument()
+    expect(card('Trigger')).toHaveAccessibleName('Trigger Conversation Opened')
+    expect(card('Trigger')).not.toHaveAttribute('aria-label')
+    expect(card('Away Message')).toHaveAccessibleDescription(/^Send Message step\. Press Enter/)
+  })
+
+  it('centres the "+" in the gap above a step, clear of both cards', async () => {
+    await renderCanvas()
+    const plus = screen.getByRole('button', {
+      name: 'Add a step between “Trigger” and “Business Hours”',
+    })
+    expect(plus.parentElement).toHaveClass('bottom-full', 'mb-[22px]')
   })
 
   it('opens a step with Enter or Space', async () => {
@@ -201,7 +208,7 @@ describe('FlowCanvas', () => {
       const wrapper = await mountCanvas()
       const canvas = wrapper.vm as unknown as { focusStep: (id: string) => boolean }
       expect(canvas.focusStep('b6a0c1')).toBe(true)
-      expect(document.activeElement?.getAttribute('aria-label')).toMatch(/^Away Message,/)
+      expect(document.activeElement?.textContent).toMatch(/^Away Message/)
       expect(canvas.focusStep('nope')).toBe(false)
       wrapper.unmount()
     })
