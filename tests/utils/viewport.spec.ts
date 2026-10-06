@@ -1,40 +1,44 @@
 import { describe, expect, it } from 'vitest'
-import { getCenterTarget } from '@/utils/viewport'
+import { getRevealViewport } from '@/utils/viewport'
 
 const container = { width: 1000, height: 800 }
 const card = { x: 100, y: 100, width: 240, height: 100 }
+const at = (x: number, y: number, zoom = 1) => ({ x, y, zoom })
 
-describe('getCenterTarget', () => {
+describe('getRevealViewport', () => {
   it('returns null when the node is already fully visible', () => {
-    expect(getCenterTarget(card, { x: 0, y: 0, zoom: 1 }, container)).toBeNull()
+    expect(getRevealViewport(card, at(0, 0), container)).toBeNull()
   })
 
-  it('centres a node that is off screen', () => {
-    // panned so the card sits left of the screen
-    expect(getCenterTarget(card, { x: -500, y: 0, zoom: 1 }, container)).toEqual({
-      x: 220,
-      y: 150,
-    })
+  it('pans only as far as needed, not to the centre', () => {
+    // panned so the card (100..340) sits at -400..-160 on screen: bring it to the 24px margin
+    expect(getRevealViewport(card, at(-500, 0), container)).toEqual(at(-76, 0))
+  })
+
+  it('moves along one axis only when the node is out of view on that axis', () => {
+    const low = { x: 100, y: 750, width: 240, height: 100 } // bottom at 850 > 800 - 24
+    expect(getRevealViewport(low, at(0, 0), container)).toEqual(at(0, -74))
   })
 
   it('treats the area under the drawer as hidden', () => {
-    const underDrawer = { x: 700, y: 100, width: 240, height: 100 }
-    expect(getCenterTarget(underDrawer, { x: 0, y: 0, zoom: 1 }, container)).toBeNull()
-    // with a 440px drawer, only 560px are visible
-    expect(getCenterTarget(underDrawer, { x: 0, y: 0, zoom: 1 }, container, 440)).toEqual({
-      x: 820 + 220, // node centre, shifted so it lands in the middle of the visible part
-      y: 150,
-    })
+    const underDrawer = { x: 500, y: 100, width: 240, height: 100 } // right edge at 740
+    expect(getRevealViewport(underDrawer, at(0, 0), container)).toBeNull()
+    // with a 440px drawer only 560px are visible: shift left so the right edge lands at 536
+    expect(getRevealViewport(underDrawer, at(0, 0), container, 440)).toEqual(at(-204, 0))
   })
 
   it('accounts for zoom', () => {
-    const target = getCenterTarget(card, { x: 0, y: 0, zoom: 2 }, container, 400)
-    // at 2× the card spans 200..680 on screen, past the visible 600px
-    expect(target).toEqual({ x: 220 + 100, y: 150 })
+    // at 2× the card spans 200..680 on screen, past the 576px usable with a 400px drawer
+    expect(getRevealViewport(card, at(0, 0, 2), container, 400)).toEqual(at(-104, 0, 2))
   })
 
-  it('requires a small margin from the edges', () => {
+  it('shows the start of a node wider than the visible area', () => {
+    const wide = { x: 100, y: 100, width: 900, height: 100 }
+    expect(getRevealViewport(wide, at(0, 0), container, 440)).toEqual(at(-76, 0))
+  })
+
+  it('keeps a small margin from the edges', () => {
     const nearEdge = { x: 10, y: 100, width: 240, height: 100 }
-    expect(getCenterTarget(nearEdge, { x: 0, y: 0, zoom: 1 }, container)).not.toBeNull()
+    expect(getRevealViewport(nearEdge, at(0, 0), container)).toEqual(at(14, 0))
   })
 })

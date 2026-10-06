@@ -60,7 +60,9 @@ watch(
 /** Moves keyboard focus to the panel's title, so Tab continues into its content. */
 async function focus() {
   await nextTick()
-  heading.value?.focus()
+  // preventScroll: while the drawer slides in it is still off to the right, and focusing it
+  // would scroll its container sideways, shifting the whole canvas.
+  heading.value?.focus({ preventScroll: true })
 }
 
 defineExpose({ focus })
