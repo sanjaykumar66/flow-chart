@@ -1,5 +1,7 @@
 # Flow Chart
 
+[![CI](https://github.com/sanjaykumar66/flow-chart/actions/workflows/ci.yml/badge.svg)](https://github.com/sanjaykumar66/flow-chart/actions/workflows/ci.yml)
+
 A visual editor for a chat automation flow, built with Vue 3 for the respond.io frontend
 assignment. It loads a flow from `payload.json`, draws it as a tree on a canvas, and lets you
 create, edit, move and delete steps. It also has undo/redo, protection against losing unsaved
@@ -9,8 +11,8 @@ changes, and full keyboard support.
 
 |                 | Link                                         |
 | --------------- | -------------------------------------------- |
-| Production      | _add the Vercel URL here_                    |
-| GitHub          | _add the repository URL here_                |
+| Production      | https://flow-chart-tau.vercel.app            |
+| GitHub          | https://github.com/sanjaykumar66/flow-chart  |
 | Assignment data | [`public/payload.json`](public/payload.json) |
 
 ## Contents
@@ -34,7 +36,7 @@ changes, and full keyboard support.
 17. [Gaps in the brief and how they were filled](#gaps-in-the-brief-and-how-they-were-filled)
 18. [Accessibility](#accessibility)
 19. [Testing](#testing)
-20. [Continuous integration](#continuous-integration)
+20. [CI/CD](#cicd)
 21. [Known limitations](#known-limitations)
 
 ## Overview
@@ -62,7 +64,7 @@ Versions are pinned with [Volta](https://volta.sh) in `package.json` (Node 22.23
 With Volta installed, the right versions are used automatically. Without it, `nvm use` reads
 `.nvmrc`.
 
-1. Clone the repository: `git clone <repository URL>`
+1. Clone the repository: `git clone https://github.com/sanjaykumar66/flow-chart.git`
 2. Go to the project folder: `cd flow-chart`
 3. Install dependencies: `yarn`
 4. Start the dev server: `yarn dev`, then open http://localhost:5173
@@ -782,7 +784,24 @@ yarn test:coverage   # unit, component and app tests with coverage
 yarn test:e2e        # browser tests; starts the dev server itself
 ```
 
-## Continuous integration
+## CI/CD
+
+Every change reaches `main` through a pull request. GitHub Actions checks it, and Vercel deploys
+it.
+
+```mermaid
+flowchart LR
+    A[Push to a branch] --> B[Open a pull request]
+    B --> C[GitHub Actions CI<br/>Lint · Format · Unit tests]
+    B --> D[Vercel preview deploy<br/>own URL per PR]
+    C -->|all green| E{Merge allowed}
+    C -->|any red| F[Merge blocked<br/>fix and push again]
+    F --> C
+    E -->|Merge to main| G[CI runs on main]
+    E -->|Merge to main| H[Vercel production deploy<br/>flow-chart-tau.vercel.app]
+```
+
+### Continuous integration (GitHub Actions)
 
 `.github/workflows/ci.yml` runs on every pull request, and on every push to `main`. It has three
 jobs, which run in parallel:
@@ -795,10 +814,39 @@ jobs, which run in parallel:
 
 - **Setup:** each job uses the Node version from `.nvmrc` and installs with
   `yarn install --frozen-lockfile`, so CI fails if `yarn.lock` is out of date.
-- **Cancelling stale runs:** a new push to the same pull request cancels the run still in progress.
-- **Blocking merges:** to stop a pull request from merging until all three jobs pass, add a branch
-  protection rule for `main` on GitHub. Go to **Settings → Branches**, turn on **Require status
-  checks to pass before merging**, and select **Lint**, **Format** and **Unit tests**.
+- **Cancelling stale runs:** a new push to the same pull request cancels the run still in
+  progress.
+- **Status:** the badge at the top of this README shows the latest result on `main`.
+
+### Merge rules (GitHub ruleset on `main`)
+
+- **No direct pushes:** changes go through a pull request.
+- **Required checks:** **Lint**, **Format** and **Unit tests** must pass before the pull request
+  can be merged.
+
+To change these rules, go to the repository's **Settings → Rules → Rulesets**.
+
+### Continuous deployment (Vercel)
+
+The repository is connected to Vercel, which builds with `yarn build` and serves `dist/`.
+
+| Event                       | Result                                                           |
+| --------------------------- | ---------------------------------------------------------------- |
+| Pull request opened/updated | A **preview deployment** with its own URL, linked on the PR      |
+| Merge (push) to `main`      | A **production deployment** to https://flow-chart-tau.vercel.app |
+
+`vercel.json` rewrites every path to `index.html`, so deep links such as `/nodes/b6a0c1` work
+when opened directly or refreshed.
+
+### Running the same checks locally
+
+Run these before pushing, to catch what CI would fail on:
+
+```bash
+yarn lint:check && yarn format:check && yarn test:run
+```
+
+The browser tests (`yarn test:e2e`) aren't part of CI. Run them locally when you change the UI.
 
 ## Known limitations
 
