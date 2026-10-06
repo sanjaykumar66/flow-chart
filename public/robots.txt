@@ -1,0 +1,5 @@
+# Allow every crawler to index the app.
+User-agent: *
+Allow: /
+
+Sitemap: https://flow-chart-tau.vercel.app/sitemap.xml

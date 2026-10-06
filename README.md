@@ -247,7 +247,7 @@ src/
   types/        payload and canvas types
 tests/          unit and component tests (Vitest), mirroring src/
 e2e/            browser tests (Playwright): WCAG 2.1 AA scans and keyboard flows
-public/         payload.json and the favicon
+public/         payload.json, favicon, robots.txt and sitemap.xml
 ```
 
 ## Data model
