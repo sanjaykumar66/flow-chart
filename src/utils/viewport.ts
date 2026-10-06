@@ -1,5 +1,3 @@
-import type { XYPosition } from '@/types/flow'
-
 export interface Rect {
   x: number
   y: number
@@ -13,18 +11,29 @@ export interface Viewport {
   zoom: number
 }
 
+/** Shift along one axis that brings [start, end] inside [min, max], or 0 if it already is. */
+function shiftInto(start: number, end: number, min: number, max: number): number {
+  if (end - start > max - min) return min - start // larger than the space: show its start
+  if (start < min) return min - start
+  if (end > max) return max - end
+  return 0
+}
+
 /**
- * Where to centre the view so a node is visible, or `null` if it already is.
- * `rect` is in flow coordinates; `container` is the canvas size on screen; `rightInset` is the
- * width covered by the drawer, so the node is centred in the part the user can still see.
+ * The viewport that makes a node fully visible with the smallest pan, keeping the zoom, or
+ * `null` if it is already visible. `rect` is in flow coordinates; `container` is the canvas size
+ * on screen; `rightInset` is the width covered by the drawer, treated as hidden.
+ *
+ * It pans only as far as needed (like scrolling an element into view) rather than centring the
+ * node, so opening a step that's just under the drawer nudges the canvas instead of jumping.
  */
-export function getCenterTarget(
+export function getRevealViewport(
   rect: Rect,
   viewport: Viewport,
   container: { width: number; height: number },
   rightInset = 0,
   margin = 24,
-): XYPosition | null {
+): Viewport | null {
   const { zoom } = viewport
   const left = rect.x * zoom + viewport.x
   const top = rect.y * zoom + viewport.y
@@ -32,17 +41,8 @@ export function getCenterTarget(
   const bottom = top + rect.height * zoom
   const visibleWidth = Math.max(container.width - rightInset, 0)
 
-  const inView =
-    left >= margin &&
-    top >= margin &&
-    right <= visibleWidth - margin &&
-    bottom <= container.height - margin
-  if (inView) return null
-
-  // setCenter puts a flow point at the container's centre; shift it so the node lands in the
-  // middle of the visible part (left of the drawer).
-  return {
-    x: rect.x + rect.width / 2 + rightInset / 2 / zoom,
-    y: rect.y + rect.height / 2,
-  }
+  const dx = shiftInto(left, right, margin, visibleWidth - margin)
+  const dy = shiftInto(top, bottom, margin, container.height - margin)
+  if (dx === 0 && dy === 0) return null
+  return { x: viewport.x + dx, y: viewport.y + dy, zoom }
 }

@@ -651,6 +651,13 @@ describe('FlowView', () => {
       expect(document.querySelector('.n-drawer')?.closest('main')).toBe(screen.getByRole('main'))
     })
 
+    it('clips the canvas area with overflow: clip, so focus can never scroll it sideways', async () => {
+      await renderAt('/')
+      // overflow: hidden still lets focus() scroll the box, which shifted the whole canvas.
+      expect(screen.getByRole('main')).toHaveClass('overflow-clip')
+      expect(screen.getByRole('main')).not.toHaveClass('overflow-hidden')
+    })
+
     it('keeps the More actions menu inside the header', async () => {
       await renderAt('/')
       await fireEvent.click(screen.getByRole('button', { name: 'More actions' }))

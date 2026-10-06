@@ -13,7 +13,7 @@ import { Background, BackgroundVariant } from '@vue-flow/background'
 import { FIT_VIEW_PADDING } from '@/constants/canvas'
 import type { XYPosition } from '@/types/flow'
 import { motionDuration } from '@/utils/motion'
-import { getCenterTarget } from '@/utils/viewport'
+import { getRevealViewport } from '@/utils/viewport'
 import CanvasControls from './CanvasControls.vue'
 import { canvasContextKey } from './context'
 import LinkEdge from './edges/LinkEdge.vue'
@@ -52,7 +52,7 @@ const nodeTypes = { action: markRaw(ActionNode), connector: markRaw(ConnectorNod
 const edgeTypes = { link: markRaw(LinkEdge) }
 
 // Created here so the VueFlow below uses this same instance.
-const { fitView, findNode, viewport, dimensions, setCenter } = useVueFlow()
+const { fitView, findNode, viewport, dimensions, setViewport } = useVueFlow()
 
 const helpId = useId()
 
@@ -72,7 +72,7 @@ function focusStep(id: string): boolean {
   const card = document.querySelector<HTMLElement>(
     `.vue-flow__node[data-id="${CSS.escape(id)}"] [role="button"]`,
   )
-  card?.focus()
+  card?.focus({ preventScroll: true }) // the canvas pans itself; don't let the browser scroll
   return !!card
 }
 
@@ -94,7 +94,7 @@ function onNodesInitialized() {
   fitView({ padding: FIT_VIEW_PADDING })
 }
 
-// Pan (keeping the zoom) so the requested node is visible and not under the drawer.
+// Pan as little as needed (keeping the zoom) so the requested node is visible, not under the drawer.
 watch(
   () => props.focusRequest,
   async (request) => {
@@ -102,14 +102,13 @@ watch(
     await nextTick() // let moved nodes render at their new position first
     const node = findNode(request.id)
     if (!node || !node.dimensions.width) return
-    const target = getCenterTarget(
+    const target = getRevealViewport(
       { ...node.computedPosition, ...node.dimensions },
       viewport.value,
       dimensions.value,
       props.rightInset,
     )
-    if (target)
-      setCenter(target.x, target.y, { zoom: viewport.value.zoom, duration: motionDuration(300) })
+    if (target) setViewport(target, { duration: motionDuration(300) })
   },
 )
 

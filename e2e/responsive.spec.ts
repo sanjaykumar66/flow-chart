@@ -61,3 +61,22 @@ for (const [name, width, height] of [
     })
   })
 }
+
+test('opening the drawer never makes the page wider (no sideways shake)', async ({ page }) => {
+  await openApp(page)
+  // Record the page width on every frame while the drawer slides in.
+  await page.evaluate(() => {
+    const widths: number[] = []
+    ;(window as unknown as { widths: number[] }).widths = widths
+    const start = performance.now()
+    const tick = () => {
+      widths.push(document.documentElement.scrollWidth)
+      if (performance.now() - start < 1000) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  })
+  await page.locator('.vue-flow__node[data-id="b6a0c1"] [role="button"]').click()
+  await page.waitForTimeout(1100)
+  const widths = await page.evaluate(() => (window as unknown as { widths: number[] }).widths)
+  expect(Math.max(...widths)).toBeLessThanOrEqual(page.viewportSize()!.width)
+})

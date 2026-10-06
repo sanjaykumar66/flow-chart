@@ -198,7 +198,7 @@ watch(
     const focusWasLost =
       !active || active === document.body || !!active.closest('.n-drawer, .n-modal-container')
     if (focusWasLost && !flowCanvas.value?.focusStep(previousId)) {
-      document.querySelector<HTMLElement>('main')?.focus()
+      document.querySelector<HTMLElement>('main')?.focus({ preventScroll: true })
     }
   },
 )
@@ -401,7 +401,7 @@ async function onDeleteDialogClosed() {
   focusAfterDelete = undefined
   await nextTick()
   if (!target || !flowCanvas.value?.focusStep(target)) {
-    document.querySelector<HTMLElement>('main')?.focus()
+    document.querySelector<HTMLElement>('main')?.focus({ preventScroll: true })
   }
 }
 </script>
@@ -439,7 +439,7 @@ async function onDeleteDialogClosed() {
 
     <main
       id="flow-canvas"
-      class="relative min-h-0 flex-1 outline-none"
+      class="relative min-h-0 flex-1 overflow-clip outline-none"
       tabindex="-1"
       aria-label="Flow canvas"
     >
@@ -475,7 +475,9 @@ async function onDeleteDialogClosed() {
     </main>
   </div>
 
-  <!-- Opens over the canvas only, so Undo/Redo and Create stay reachable while editing. -->
+  <!-- Opens over the canvas only, so Undo/Redo and Create stay reachable while editing.
+       <main> clips it with overflow: clip (not hidden): a hidden-overflow box can still be scrolled
+       by focus or scrollIntoView, which would slide the whole canvas sideways. -->
   <BaseDrawer
     ref="drawer"
     v-model:show="drawerOpen"

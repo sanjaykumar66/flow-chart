@@ -98,9 +98,13 @@ describe('BaseDrawer', () => {
         props: { show: true, title: 'Away Message' },
         attachTo: document.body,
       })
+      // Without preventScroll, focusing the still-sliding-in drawer scrolls its container sideways.
+      const focusSpy = vi.spyOn(HTMLElement.prototype, 'focus')
       await (wrapper.vm as unknown as { focus: () => Promise<void> }).focus()
       expect(document.activeElement?.tagName).toBe('H2')
+      expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true })
       expect(document.activeElement).toHaveTextContent('Away Message')
+      focusSpy.mockRestore()
       wrapper.unmount()
     })
   })
