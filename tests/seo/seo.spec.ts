@@ -23,6 +23,20 @@ describe('SEO', () => {
     )
   })
 
+  it('has its own favicon in every format browsers ask for', () => {
+    const href = (selector: string) => html.querySelector(selector)?.getAttribute('href')
+    expect(href('link[rel="icon"][type="image/svg+xml"]')).toBe('/favicon.svg')
+    expect(href('link[rel="icon"][sizes="32x32"]')).toBe('/favicon.ico')
+    expect(href('link[rel="apple-touch-icon"]')).toBe('/apple-touch-icon.png')
+    // The Vite template's default logo is purple (#863bff); ours is the app's blue mark.
+    const svg = read('public/favicon.svg')
+    expect(svg).toContain('#2563eb')
+    expect(svg).not.toContain('#863bff')
+    for (const file of ['public/favicon.ico', 'public/apple-touch-icon.png']) {
+      expect(readFileSync(resolve(__dirname, '../..', file)).length).toBeGreaterThan(0)
+    }
+  })
+
   it('has link-preview tags', () => {
     expect(meta('meta[property="og:title"]')).toBe('Flow Builder')
     expect(meta('meta[property="og:description"]')).not.toBe('')
