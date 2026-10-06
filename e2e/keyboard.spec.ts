@@ -155,8 +155,11 @@ test.describe('keyboard', () => {
     const deleteButton = page.getByRole('button', { name: 'Delete' })
     await deleteButton.focus()
     await page.keyboard.press('Enter')
+    // The dialog's code loads on first use: wait for it before pressing Esc.
+    const dialog = page.getByRole('dialog', { name: 'Delete node?' })
+    await expect(dialog).toBeVisible()
     await page.keyboard.press('Escape')
-    await expect(page.getByText('Delete node?')).toBeHidden()
+    await expect(dialog).toBeHidden()
     await expect(deleteButton).toBeFocused()
   })
 

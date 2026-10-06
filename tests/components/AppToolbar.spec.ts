@@ -25,4 +25,30 @@ describe('AppToolbar', () => {
     render(AppToolbar, { slots: { actions: '<button>Undo</button>' } })
     expect(screen.getByRole('button', { name: 'Undo' })).toBeInTheDocument()
   })
+
+  describe('screen sizes', () => {
+    const renderAt = (wide: boolean) => {
+      vi.spyOn(window, 'matchMedia').mockReturnValue({
+        matches: wide,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      } as unknown as MediaQueryList)
+      render(AppToolbar)
+      return screen.getByRole('button', { name: 'Create New Node' })
+    }
+
+    it('shows the full Create New Node label on wider screens', () => {
+      const button = renderAt(true)
+      expect(button).toHaveTextContent('Create New Node')
+      expect(button).not.toHaveAttribute('aria-label')
+      vi.restoreAllMocks()
+    })
+
+    it('shows only the "+" on phones, keeping the accessible name', () => {
+      const button = renderAt(false)
+      expect(button).not.toHaveTextContent('Create New Node')
+      expect(button).toHaveAttribute('aria-label', 'Create New Node')
+      vi.restoreAllMocks()
+    })
+  })
 })

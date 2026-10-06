@@ -15,6 +15,7 @@ withDefaults(
     description?: string
     icon?: Component
     iconColor?: string
+    /** Pixels (capped at the screen width on phones) or any CSS width. */
     width?: number | string
   }>(),
   { title: '', description: '', icon: undefined, iconColor: undefined, width: DRAWER_WIDTH },
@@ -77,7 +78,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
   <NDrawer
     v-model:show="show"
     placement="right"
-    :width="width"
+    :width="typeof width === 'number' ? `min(${width}px, 100vw)` : width"
     :show-mask="false"
     :trap-focus="false"
     :block-scroll="false"
