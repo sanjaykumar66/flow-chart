@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
-import { screen } from '@testing-library/vue'
+import { fireEvent, screen } from '@testing-library/vue'
 import { mount } from '@vue/test-utils'
 import { NTimePicker } from 'naive-ui'
 import BusinessHoursEditor from '@/components/editors/BusinessHoursEditor.vue'
-import { WEEK_DAYS } from '@/constants/forms'
+import { DEFAULT_OPENING_HOURS, WEEK_DAYS } from '@/constants/forms'
 import type { BusinessHoursSlot } from '@/types/flow'
 import { renderInForm } from '../../helpers/renderInForm'
 
@@ -75,5 +75,44 @@ describe('BusinessHoursEditor', () => {
     const [afterClosing] = onUpdateTimes.mock.calls[1] as [BusinessHoursSlot[]]
     expect(afterClosing[0]).toEqual({ day: 'mon', startTime: '09:00', endTime: '18:00' })
     wrapper.unmount()
+  })
+
+  describe('opening and closing days', () => {
+    const switchFor = (day: string) => screen.getByRole('switch', { name: `${day} open` })
+
+    it('has a named switch per day showing whether it is open', () => {
+      setup(nineToFive().filter((slot) => slot.day !== 'sun'))
+      expect(switchFor('Mon')).toHaveAttribute('aria-checked', 'true')
+      expect(switchFor('Sun')).toHaveAttribute('aria-checked', 'false')
+    })
+
+    it('closes an open day', async () => {
+      const { model } = setup()
+      await fireEvent.click(switchFor('Wed'))
+      expect(model.times.map((slot) => slot.day)).toEqual([
+        'mon',
+        'tue',
+        'thu',
+        'fri',
+        'sat',
+        'sun',
+      ])
+      expect(await screen.findByText('Closed')).toBeInTheDocument()
+    })
+
+    it('opens a closed day with the default hours, in week order', async () => {
+      const { model } = setup(nineToFive().filter((slot) => slot.day !== 'wed'))
+      await fireEvent.click(switchFor('Wed'))
+      expect(model.times.map((slot) => slot.day)).toEqual(WEEK_DAYS.map(({ value }) => value))
+      expect(model.times[2]).toEqual({ day: 'wed', ...DEFAULT_OPENING_HOURS })
+      expect(await screen.findByLabelText('Wed opening time')).toHaveValue('09:00')
+    })
+
+    it('can close every day', async () => {
+      const { model, validate } = setup([{ day: 'mon', startTime: '09:00', endTime: '17:00' }])
+      await fireEvent.click(switchFor('Mon'))
+      expect(model.times).toEqual([])
+      await expect(validate()).resolves.toEqual([])
+    })
   })
 })

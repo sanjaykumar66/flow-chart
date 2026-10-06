@@ -130,6 +130,8 @@ function onNodeDragStop({ node }: NodeDragEvent) {
       Press Enter or Space to open the step's details. Use the arrow keys to move it, with Shift to
       move further. Press question mark for all keyboard shortcuts.
     </p>
+    <!-- disable-keyboard-a11y: drop Vue Flow's own key handling and its screen-reader hints
+         ("press delete to remove…"), which don't apply here; steps have their own (see ActionNode). -->
     <VueFlow
       :nodes="nodes"
       :edges="edges"
@@ -139,6 +141,7 @@ function onNodeDragStop({ node }: NodeDragEvent) {
       :elements-selectable="false"
       :nodes-focusable="false"
       :edges-focusable="false"
+      :disable-keyboard-a11y="true"
       :min-zoom="0.3"
       :max-zoom="1.5"
       @nodes-initialized="onNodesInitialized"
