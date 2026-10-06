@@ -20,6 +20,7 @@ import UndoRedoButtons from '@/components/UndoRedoButtons.vue'
 import FlowCanvas from '@/components/canvas/FlowCanvas.vue'
 import NodeBasicsFields from '@/components/editors/NodeBasicsFields.vue'
 import { useHotkey } from '@/composables/useHotkey'
+import { SMALL_SCREEN_QUERY, useMediaQuery } from '@/composables/useMediaQuery'
 import { useOpenedOnce } from '@/composables/useOpenedOnce'
 import { useNodeRoute } from '@/composables/useNodeRoute'
 import { useUndoRedo } from '@/composables/useUndoRedo'
@@ -101,6 +102,9 @@ watch(rawNodes, (nodes) => {
 })
 
 // ---- Selection follows the URL: /nodes/:nodeId opens that node's details ----
+// On phones the drawer covers the whole canvas, so there's no visible strip to pan beside it.
+const isWide = useMediaQuery(SMALL_SCREEN_QUERY)
+
 const { selectedId, toggleNode, openNode, closeNode, replaceWithFlow } = useNodeRoute()
 const message = useMessage()
 // ---- Telling the user what changed and where ----
@@ -458,7 +462,7 @@ async function onDeleteDialogClosed() {
         :nodes="graph.nodes"
         :edges="graph.edges"
         :focus-request="focusRequest"
-        :right-inset="drawerOpen ? DRAWER_WIDTH : 0"
+        :right-inset="drawerOpen && isWide ? DRAWER_WIDTH : 0"
         @select="onSelect"
         @move="onMove"
         @add="onAdd"

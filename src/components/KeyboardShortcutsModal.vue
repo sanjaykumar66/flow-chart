@@ -25,10 +25,10 @@ const groups = getShortcuts()
         <div
           v-for="item in group.items"
           :key="item.description"
-          class="flex items-center justify-between gap-4 py-2"
+          class="flex flex-col gap-1.5 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
         >
           <dt class="text-sm text-zinc-700">{{ item.description }}</dt>
-          <dd class="flex shrink-0 items-center gap-1.5 text-xs text-zinc-600">
+          <dd class="flex shrink-0 flex-wrap items-center gap-1.5 text-xs text-zinc-600">
             <template v-for="(combo, i) in item.keys" :key="i">
               <span v-if="i > 0">or</span>
               <span class="flex gap-1">

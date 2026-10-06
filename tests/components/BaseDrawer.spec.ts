@@ -81,6 +81,11 @@ describe('BaseDrawer', () => {
     expect(onUpdateShow).not.toHaveBeenCalled()
   })
 
+  it('never gets wider than the screen', () => {
+    renderDrawer({ width: 440 })
+    expect(document.querySelector('.n-drawer')).toHaveStyle({ width: 'min(440px, 100vw)' })
+  })
+
   describe('accessibility', () => {
     it('is a non-modal dialog named by its title', async () => {
       renderDrawer({ title: 'Away Message' })

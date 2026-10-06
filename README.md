@@ -766,6 +766,8 @@ The app targets **WCAG 2.1 level AA** and is checked automatically at three leve
 - **Lines** are announced by the steps they join ("Trigger to Business Hours").
 - **The drawer** is announced as a non-modal panel named by the step's title.
 - **Tooltips** appear on keyboard focus as well as hover.
+- **Small screens:** on phones the toolbar shows only icons (each still has its accessible name)
+  and the drawer takes the full width. Nothing scrolls sideways at 320 px.
 - **Motion:** animated pans and zooms are skipped when the system "reduce motion" setting is on.
 
 One exception is excluded from the scans on purpose. Naive UI's dialogs add invisible focus
@@ -774,15 +776,15 @@ reason is noted next to the exclusion in the code.
 
 ## Testing
 
-| Suite                                                                                                   | Tool                               | What it covers                                                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit (`tests/utils`, `tests/api`, `tests/stores`, `tests/queries`, `tests/composables`, `tests/router`) | Vitest                             | Every util, the fake API, stores, queries, composables and routes                                                                                                |
-| Component (`tests/components`)                                                                          | Vitest, Testing Library, happy-dom | Each component's rendering, events, validation and keyboard behaviour                                                                                            |
-| App (`tests/views`)                                                                                     | Vitest, Testing Library            | The whole app with the real router, stores and queries against an in-memory API: routing, editing, deleting, creating, undo/redo, unsaved changes, focus, resets |
-| Accessibility (`tests/a11y`)                                                                            | axe-core                           | WCAG 2.1 A/AA on every screen and dialog                                                                                                                         |
-| Browser (`e2e/`)                                                                                        | Playwright, axe-core               | WCAG 2.1 AA including contrast, plus keyboard-only flows: Tab order, drawer focus, moving, creating and deleting steps, menus, timezone                          |
+| Suite                                                                                                   | Tool                               | What it covers                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit (`tests/utils`, `tests/api`, `tests/stores`, `tests/queries`, `tests/composables`, `tests/router`) | Vitest                             | Every util, the fake API, stores, queries, composables and routes                                                                                                                       |
+| Component (`tests/components`)                                                                          | Vitest, Testing Library, happy-dom | Each component's rendering, events, validation and keyboard behaviour                                                                                                                   |
+| App (`tests/views`)                                                                                     | Vitest, Testing Library            | The whole app with the real router, stores and queries against an in-memory API: routing, editing, deleting, creating, undo/redo, unsaved changes, focus, resets                        |
+| Accessibility (`tests/a11y`)                                                                            | axe-core                           | WCAG 2.1 A/AA on every screen and dialog                                                                                                                                                |
+| Browser (`e2e/`)                                                                                        | Playwright, axe-core               | WCAG 2.1 AA including contrast, plus keyboard-only flows: Tab order, drawer focus, moving, creating and deleting steps, menus, timezone, and phone/tablet layouts (320, 375 and 768 px) |
 
-In total that's about 420 unit, component and app tests, at roughly 97% line coverage, plus 23
+In total that's about 435 unit, component and app tests, at roughly 97% line coverage, plus 32
 browser tests.
 
 ```bash
